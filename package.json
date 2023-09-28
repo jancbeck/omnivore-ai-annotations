@@ -3,7 +3,15 @@
   "version": "1.0.0",
   "description": "Scaffold code for a Vercel app",
   "main": "index.js",
-  "scripts": {
+    "scripts": {
+      "start": "vercel dev",
+      "build": "vercel",
+      "deploy": "vercel --prod"
+    },
+    "dependencies": {
+    },
+    "license": "MIT"
+  }
     "start": "vercel dev",
     "build": "vercel",
     "deploy": "vercel --prod"
