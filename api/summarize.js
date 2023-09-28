@@ -3,7 +3,7 @@ import OpenAI from "openai";
 
 module.exports = async (req, res) => {
   const openai = new OpenAI(); // defaults to process.env["OPENAI_API_KEY"]
-
+  console.log(req.body);
   const config = {
     headers: {
       Authorization: process.env["OMNIVORE_API_KEY"],
