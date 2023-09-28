@@ -2,8 +2,28 @@ import axios from "axios";
 import OpenAI from "openai";
 
 module.exports = async (req, res) => {
+  // req.body looks like this:{
+  //   action: 'created',
+  //   userId: '64275c28-cd60-11ed-a26c-fb80cc4a9a1e',
+  //   label: {
+  //     type: 'label',
+  //     userId: '64275c28-cd60-11ed-a26c-fb80cc4a9a1e',
+  //     pageId: 'nOFXJYoBGhy2EPBcqSZg',
+  //     id: '65f08a0e-5e1d-11ee-b62a-5ff4af17cb9a',
+  //     name: 'summarize',
+  //     color: '#CE88EF',
+  //     description: '',
+  //     createdAt: '2023-09-28T16:38:05.236Z'
+  //   }
+  // }
+
+  // only proceed if label is "summarize"
+  if (req.body.label.name !== "summarize") {
+    res.status(200).send("Not a summarize label");
+    return;
+  }
+
   const openai = new OpenAI(); // defaults to process.env["OPENAI_API_KEY"]
-  console.log(req.body);
   const config = {
     headers: {
       Authorization: process.env["OMNIVORE_API_KEY"],
@@ -11,7 +31,7 @@ module.exports = async (req, res) => {
   };
   let query = `query Article {
     article(
-      slug: "${req.body.page.slug}"
+      slug: "${req.body.label.pageId}"
       username: "."
       format: "markdown"
       ) {
@@ -39,16 +59,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const article = omnivoreResponse.data.data.article.article;
-  // only proceed if article has "summarize" label
-  const labels = article.labels;
-  const hasSummarizeLabel = labels.some((label) => label.name === "summarize");
-  if (!hasSummarizeLabel) {
-    res.status(200).send("Article does not have 'summarize' label");
-    return;
-  }
-
-  const articleContent = article.content;
+  const articleContent = omnivoreResponse.data.data.article.article.content;
   let completionResponse;
   try {
     completionResponse = await openai.completions.create({
@@ -68,7 +79,7 @@ module.exports = async (req, res) => {
 
   // Update Omnivore article with summary
   // use simple hash for id shortid based on article id and datetime
-  const id = `${req.body.page.id}-${Date.now()}`;
+  const id = `${req.body.label.pageId}-${Date.now()}`;
   const shortId = id.substring(0, 8);
   query = `mutation CreateHighlight {
     createHighlight(
