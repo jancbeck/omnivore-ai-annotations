@@ -11,11 +11,4 @@
     "dependencies": {
     },
     "license": "MIT"
-  }
-    "start": "vercel dev",
-    "build": "vercel",
-    "deploy": "vercel --prod"
-  },
-  "dependencies": {
-  }
 }
