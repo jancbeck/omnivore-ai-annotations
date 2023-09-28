@@ -1,71 +1,75 @@
-# Summarize Omnivore articles using GPT and Vercel
+# Summarize Omnivore articles using GPT on Vercel deployment
 
-## Implementation:
+## Overview
 
-1. **Initialize a New Project**: Create a new directory and initialize it as a Git repository. Add a `vercel.json` file to specify your project settings.
+This Vercel serverless function automatically summarizes articles when a specific label, "summarize", is added to them. It uses the OpenAI GPT-3.5 Turbo model for generating summaries and interacts with the Omnivore API to add summaries to the article notebook.
 
-2. **Create Serverless Function**: In your project directory, create a new folder called `api`. Inside `api`, create a new file, say `summarize.js`.
+## Prerequisites
 
-3. **Install Dependencies**: Run `npm install axios openai` to install the necessary packages for HTTP requests and OpenAI API interaction.
+- Node.js 14.x or higher
+- npm
+- OpenAI API key
+- Omnivore API key
+- Vercel account
 
-4. **Write the Function**: Populate `summarize.js` with the code to fetch the article, summarize it, and update Omnivore.
+## Deployment and Usage
 
-5. **Environment Variables**: Add your OpenAI and Omnivore API keys as environment variables in your Vercel dashboard.
+### Vercel Deployment
 
-6. **Deploy**: Push your code to GitHub and connect it to Vercel for automatic deployments.
+1. Add your repository to Vercel.
+2. Set up the environment variables (`OPENAI_API_KEY` and `OMNIVORE_API_KEY`) in the Vercel dashboard.
+3. Deploy the project.
 
-### Code Example (`summarize.js`):
+### Omnivore Webhook Setup
 
-```javascript
-const axios = require("axios");
-const { OpenAIAPI } = require("openai");
+1. Log in to your Omnivore dashboard.
+2. Navigate to the webhook settings.
+3. Add a new webhook and set the URL to the deployed Vercel function URL.
+4. Configure the webhook to trigger when a new label is added.
 
-module.exports = async (req, res) => {
-  const openai = new OpenAIAPI({ key: process.env.OPENAI_API_KEY });
+Now, whenever a label named "summarize" is added to an article in Omnivore, the Vercel function will automatically summarize the article.
 
-  try {
-    // Fetch article from Omnivore
-    const omnivoreResponse = await axios.get("Omnivore_API_endpoint_here");
-    const articleContent = omnivoreResponse.data.content;
+## API Endpoints
 
-    // Summarize using OpenAI API
-    const summaryResponse = await openai.createCompletion({
-      engine: "text-davinci-002",
-      prompt: `Summarize: ${articleContent}`,
-      max_tokens: 50,
-    });
-    const summary = summaryResponse.choices[0].text.trim();
+- **POST /api/summarize**: Summarizes an article when the "summarize" label is added.
 
-    // Update Omnivore article with summary
-    const updatePayload = { note: summary };
-    await axios.post("Omnivore_API_update_endpoint_here", updatePayload);
+## Development Setup
 
-    res.status(200).send("Article summarized and updated.");
-  } catch (error) {
-    res.status(500).send(`Error: ${error.message}`);
-  }
-};
-```
+### Local Installation
 
-### Rate Limiting
+1. Clone the repository:
 
-1. **Retry Logic**: Implement a retry mechanism with exponential backoff. If you hit the rate limit, wait for a specified time and then try again, gradually increasing the wait time.
-2. **Rate-Limiter Packages**: Use npm packages like `bottleneck` or `p-throttle` to manage rate-limiting in your code.
-3. **API Gateway**: Use a third-party API Gateway that handles rate limiting, although this might be overkill for your use case.
+   ```bash
+   git clone https://github.com/jancbeck/vercel-omnivore-openai
+   ```
 
-_won't worry about that for now_
+2. Navigate to the project directory:
 
-### Error Handling and Monitoring
+   ```bash
+   cd vercel-omnivore-openai
+   ```
 
-1. **Vercel Dashboard**: Vercel automatically logs function invocations, errors, and performance metrics. You can view these logs in your Vercel dashboard.
-2. **Manual Logging**: Log critical steps and errors in your code, which will appear in the Vercel logs.
-3. **HTTP Status Codes**: Return appropriate HTTP status codes to indicate success or failure.
+3. Install dependencies:
 
-_let's just use out of the box features of Vercel_
+   ```bash
+   npm i -g vercel
+   npm install
+   ```
 
-### Testing with Postman
+#### Testing with Postman
 
 1. **Local Testing**: Vercel offers a local development environment using the `vercel dev` command. Run this command in your project directory.
 2. **Postman Setup**: Open Postman and create a new request. Set the request type to whatever your function expects (likely POST or GET).
 3. **Request URL**: Use `http://localhost:3000/api/summarize` as the URL, replacing `3000` with whatever port `vercel dev` is using.
 4. **Send Request**: Click "Send" in Postman to trigger the function.
+
+## License
+
+MIT License.
+
+## Roadmap
+
+- [ ] implement rate limiting
+- [ ] implement logging
+- [ ] more customization for GPT prompt, label, model
+- [ ] use individual article highlights to allow "chatting" within Omnivore (e.g. highlight text with note "explain" and GPT will update the highlight with a reply based on the prompt and context)

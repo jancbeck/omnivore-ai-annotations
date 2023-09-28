@@ -29,6 +29,12 @@ module.exports = async (req, res) => {
       Authorization: process.env["OMNIVORE_API_KEY"],
     },
   };
+  /**
+   * GraphQL query to retrieve article content and labels based on page ID.
+   * @param {Object} req - The request object.
+   * @param {string} req.body.label.pageId - The page ID of the article to retrieve.
+   * @returns {Object} The article content and labels.
+   */
   let query = `query Article {
     article(
       slug: "${req.body.label.pageId}"
@@ -64,7 +70,7 @@ module.exports = async (req, res) => {
   try {
     completionResponse = await openai.completions.create({
       prompt: `${articleContent} 
-      summarize the above article in one sentence for a busy executive`,
+      summarize the above article in one sentence for a well educated but busy executive`,
       max_tokens: 70,
       model: "gpt-3.5-turbo-instruct",
       temperature: 0,
@@ -81,6 +87,7 @@ module.exports = async (req, res) => {
   // use simple hash for id shortid based on article id and datetime
   const id = `${req.body.label.pageId}-${Date.now()}`;
   const shortId = id.substring(0, 8);
+
   query = `mutation CreateHighlight {
     createHighlight(
       input: {id: "${id}", shortId: "${id}", articleId: "${req.body.label.pageId}", annotation: "GPT SUMMARY: ${articleSummary}", type: NOTE}
@@ -114,7 +121,8 @@ module.exports = async (req, res) => {
       { query },
       config
     );
-    res.status(200).send(response.data);
+    //res.status(200).send(response.data);
+    res.status(200).send("Article summary added");
   } catch (error) {
     res.status(500).send(`Error: ${error.message}`);
   }
