@@ -1,0 +1,13 @@
+{
+  "name": "vercel-omnivore-openai",
+  "version": "1.0.0",
+  "description": "Scaffold code for a Vercel app",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev",
+    "build": "vercel",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+  }
+}
