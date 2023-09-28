@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
   const shortId = id.substring(0, 8);
   query = `mutation CreateHighlight {
     createHighlight(
-      input: {id: "${id}", shortId: "${id}", articleId: "${req.body.page.id}", annotation: "GPT SUMMARY: ${articleSummary}", type: NOTE}
+      input: {id: "${id}", shortId: "${id}", articleId: "${req.body.label.pageId}", annotation: "GPT SUMMARY: ${articleSummary}", type: NOTE}
     ) {
       ... on CreateHighlightSuccess {
         highlight {
