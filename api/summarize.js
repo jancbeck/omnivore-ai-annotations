@@ -16,7 +16,6 @@ module.exports = async (req, res) => {
   //       "createdAt": "2023-09-28T16: 38: 05.236Z"
   //     }
   // }
-  console.log(req.body);
   // only proceed if label is "summarize"
   if (req.body.label.name !== "summarize") {
     res.status(200).send("Not a summarize label");
@@ -61,27 +60,39 @@ module.exports = async (req, res) => {
     );
     //res.status(200).send(omnivoreResponse);
   } catch (error) {
-    res.status(500).send(`Error: ${error.message}`);
+    res.status(500).send(`Error 1: ${error.message}`);
     return;
   }
 
   const articleContent = omnivoreResponse.data.data.article.article.content;
   let completionResponse;
   try {
-    completionResponse = await openai.completions.create({
-      prompt: `${articleContent} 
+    completionResponse = await openai.chat.completions
+      .create({
+        messages: [
+          {
+            role: "user",
+            content: `${articleContent} 
       summarize the above article in one sentence for a well educated but busy executive`,
-      max_tokens: 70,
-      model: "gpt-3.5-turbo-instruct",
-      temperature: 0,
-    });
+          },
+        ],
+        model: "gpt-3.5-turbo-16k",
+        max_tokens: 70,
+        temperature: 0,
+      })
+      .catch((err) => {
+        throw err;
+      });
 
     //res.status(200).send(completionResponse);
   } catch (error) {
-    res.status(500).send(`Error: ${error.message}`);
+    res.status(500).send(`Error 2: ${error.message}`);
     return;
   }
-  const articleSummary = completionResponse.choices[0].text.trim();
+  const articleSummary = completionResponse.choices[0].message.content
+    .trim()
+    .replace(/"/g, '\\"')
+    .replace(/\\/g, "\\\\");
 
   // Update Omnivore article with summary
   // use simple hash for id shortid based on article id and datetime
@@ -90,7 +101,7 @@ module.exports = async (req, res) => {
 
   query = `mutation CreateHighlight {
     createHighlight(
-      input: {id: "${id}", shortId: "${id}", articleId: "${req.body.label.pageId}", annotation: "GPT SUMMARY: ${articleSummary}", type: NOTE}
+      input: {id: "${id}", shortId: "${shortId}", articleId: "${req.body.label.pageId}", annotation: "GPT SUMMARY: ${articleSummary}", type: NOTE}
     ) {
       ... on CreateHighlightSuccess {
         highlight {
@@ -124,6 +135,6 @@ module.exports = async (req, res) => {
     //res.status(200).send(response.data);
     res.status(200).send("Article summary added");
   } catch (error) {
-    res.status(500).send(`Error: ${error.message}`);
+    res.status(500).send(`Error 3: ${error.message}`);
   }
 };
