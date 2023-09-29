@@ -3,20 +3,20 @@ import OpenAI from "openai";
 
 module.exports = async (req, res) => {
   // req.body looks like this:{
-  //   action: 'created',
-  //   userId: '64275c28-cd60-11ed-a26c-fb80cc4a9a1e',
-  //   label: {
-  //     type: 'label',
-  //     userId: '64275c28-cd60-11ed-a26c-fb80cc4a9a1e',
-  //     pageId: 'nOFXJYoBGhy2EPBcqSZg',
-  //     id: '65f08a0e-5e1d-11ee-b62a-5ff4af17cb9a',
-  //     name: 'summarize',
-  //     color: '#CE88EF',
-  //     description: '',
-  //     createdAt: '2023-09-28T16:38:05.236Z'
-  //   }
+  //     "action": "created",
+  //     "userId": "64275c28-cd60-11ed-a26c-fb80cc4a9a1e",
+  //     "label": {
+  //       "type": "label",
+  //       "userId": "64275c28-cd60-11ed-a26c-fb80cc4a9a1e",
+  //       "pageId": "nOFXJYoBGhy2EPBcqSZg",
+  //       "id": "65f08a0e-5e1d-11ee-b62a-5ff4af17cb9a",
+  //       "name": "summarize",
+  //       "color": "#CE88EF",
+  //       "description": "",
+  //       "createdAt": "2023-09-28T16: 38: 05.236Z"
+  //     }
   // }
-
+  console.log(req.body);
   // only proceed if label is "summarize"
   if (req.body.label.name !== "summarize") {
     res.status(200).send("Not a summarize label");
