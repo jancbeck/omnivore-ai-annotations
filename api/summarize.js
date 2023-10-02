@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
           {
             role: "user",
             content: `${articleContent} 
-      TL;DR: `,
+      tweet-length TL;DR: `,
           },
         ],
         model: "gpt-3.5-turbo-16k",
