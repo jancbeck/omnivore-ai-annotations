@@ -64,7 +64,8 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const articleContent = omnivoreResponse.data.data.article.article.content;
+  const articleContent =
+    omnivoreResponse.data.data.article.article.content.substring(0, 55000);
   let completionResponse;
   try {
     completionResponse = await openai.chat.completions
@@ -83,6 +84,7 @@ module.exports = async (req, res) => {
       .catch((err) => {
         throw err;
       });
+    console.log(completionResponse.usage);
 
     //res.status(200).send(completionResponse);
   } catch (error) {
