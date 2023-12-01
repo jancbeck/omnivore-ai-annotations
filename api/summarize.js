@@ -163,7 +163,7 @@ Article content: ${articleContent}`,
       }
     );
     OmnivoreAnnotationResponse = await OmnivoreAnnotationResponse.json();
-    return new Response(
+    console.log(
       `Article annotation added to article "${articleTitle}" (ID: ${articleId}): ${JSON.stringify(
         OmnivoreAnnotationResponse.data.createHighlight
       )}`
