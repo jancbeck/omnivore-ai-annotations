@@ -168,6 +168,7 @@ Article content: ${articleContent}`,
         OmnivoreAnnotationResponse.data.createHighlight
       )}`
     );
+    return new Response(`Article annotation added.`);
   } catch (error) {
     return new Response(
       `Error adding annotation to Omnivore article "${articleTitle}" (ID: ${articleId}): ${error.message}`,
