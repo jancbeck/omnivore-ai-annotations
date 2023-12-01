@@ -130,16 +130,14 @@ Article content: ${articleContent}`,
   // STEP 3: Update Omnivore article with OpenAI completion
 
   // use simple hash for id shortid based on article id and datetime
-  const id = Date.now();
-  const shortId = id.toString().slice(-8);
   const annotationSettings =
     process.env["OMNIVORE_ANNOTATION_SETTINGS"] || `type: NOTE`;
 
   query = `mutation CreateHighlight {
     createHighlight(
       input: {
-        id: "${id}", 
-        shortId: "${shortId}", 
+        id: "${articleId}", 
+        shortId: "${articleId}", 
         articleId: "${articleId}", 
         annotation: "${articleSummary.substring(0, 4000)}", 
         ${annotationSettings}}
@@ -154,7 +152,6 @@ Article content: ${articleContent}`,
       }
     }
   }`;
-  console.log(omnivoreHeaders);
   let OmnivoreAnnotationResponse;
   try {
     OmnivoreAnnotationResponse = await fetch(

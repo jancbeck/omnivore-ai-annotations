@@ -1,2 +1,3 @@
 .vercel
 schema.txt
+.env*.local
