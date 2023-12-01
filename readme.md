@@ -69,7 +69,4 @@ MIT License.
 
 ## Roadmap
 
-- [ ] implement rate limiting
-- [ ] implement logging
-- [ ] more customization for GPT prompt, label, model
 - [ ] use individual article highlights to allow "chatting" within Omnivore (e.g. highlight text with note "explain" and GPT will update the highlight with a reply based on the prompt and context)
