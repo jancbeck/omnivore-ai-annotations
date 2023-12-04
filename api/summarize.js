@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { nanoid } from "nanoid";
+import { v4 as uuidv4 } from "uuid";
 
 export const config = {
   runtime: "edge",
@@ -134,8 +134,8 @@ Article content: ${articleContent}`,
   // use simple hash for id shortid based on article id and datetime
   const annotationSettings =
     process.env["OMNIVORE_ANNOTATION_SETTINGS"] || `type: NOTE`;
-  const id = nanoid();
-  const shortId = nanoid(8);
+  const id = uuidv4();
+  const shortId = id.substring(0, 8);
 
   query = {
     query: `mutation CreateHighlight($input: CreateHighlightInput!) {

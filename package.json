@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "nanoid": "^5.0.4",
-    "openai": "^4.x"
+    "openai": "^4.x",
+    "uuid": "^9.0.1"
   }
 }
