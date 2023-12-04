@@ -132,8 +132,8 @@ Article content: ${articleContent}`,
   // STEP 3: Update Omnivore article with OpenAI completion
 
   // use simple hash for id shortid based on article id and datetime
-  const annotationSettings =
-    process.env["OMNIVORE_ANNOTATION_SETTINGS"] || `type: NOTE`;
+  const annotationInput =
+    process.env["OMNIVORE_ANNOTATION_INPUT"] || `{"type": "NOTE"}`;
   const id = uuidv4();
   const shortId = id.substring(0, 8);
 
@@ -177,9 +177,9 @@ Article content: ${articleContent}`,
   }`,
     variables: {
       input: {
+        ...JSON.parse(annotationInput),
         id: id,
         shortId: shortId,
-        type: "NOTE",
         articleId: articleId,
         annotation: articleAnnotation,
       },
@@ -195,13 +195,14 @@ Article content: ${articleContent}`,
         body: JSON.stringify(query),
       }
     );
-    console.log(query);
     OmnivoreAnnotationResponse = await OmnivoreAnnotationResponse.json();
     console.log(
       `Article annotation added to article "${articleTitle}" (ID: ${articleId}): ${JSON.stringify(
         OmnivoreAnnotationResponse.data.createHighlight
-      )}`
+      )}`,
+      `Used this GraphQL query: ${JSON.stringify(query)}`
     );
+
     return new Response(`Article annotation added.`);
   } catch (error) {
     return new Response(
