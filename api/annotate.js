@@ -54,41 +54,87 @@ export default async (req) => {
   //     ]
   //   }
   // }
+  // or when a page is created:
+  //   {
+  //     "action": "created",
+  //     "userId": "<YOUR USER ID>",
+  //     "page": {
+  //         "type": "page",
+  //         "userId": "<YOUR USER ID>",
+  //         "id": "f187586d-1380-4c1b-887f-140fb9217465",
+  //         "slug": "fast-api-experiment-middleware-feature-by-life-is-short-so-enjoy-18a22a66735",
+  //         "originalHtml": "FULLHTML",
+  //         "description": "While I worked on adding authentication into FastAPI application, I had a chance to take a look the FastAPI Middleware feature. Let’s try the example in FastAPI documentation. The example is adding…",
+  //         "title": "FastAPI: Experiment Middleware feature | by Life-is-short--so--enjoy-it | Aug, 2023 | Medium",
+  //         "author": "Life-is-short--so--enjoy-it",
+  //         "url": "https://medium.com/@life-is-short-so-enjoy-it/fastapi-experiment-middleware-feature-c0a0c7314d74",
+  //         "pageType": "ARTICLE",
+  //         "hash": "37e42d0dbd7b710094e77808a81bdd43",
+  //         "image": "https://miro.medium.com/v2/resize:fit:1200/1*SDkMzvL5PNsIGchfG-N--w.png",
+  //         "publishedAt": "2023-08-12T08:05:10.316Z",
+  //         "readingProgressPercent": 0,
+  //         "readingProgressAnchorIndex": 0,
+  //         "state": "SUCCEEDED",
+  //         "createdAt": "2023-08-23T13:47:25.365Z",
+  //         "savedAt": "2023-08-23T13:47:25.365Z",
+  //         "siteName": "Medium",
+  //         "language": "English",
+  //         "siteIcon": "https://miro.medium.com/v2/1*m-R_BkNf1Qjr1YbyOIJY2w.png",
+  //         "wordsCount": 1257,
+  //         "archivedAt": null
+  //     }
+  // }
 
-  const { label } = body;
-  const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"];
+  const { label, page: pageCreated } = body;
+  const isPageCreatedWebhook = Boolean(pageCreated?.id);
+  const hasLabel = Boolean(label?.labels?.length || label?.name);
+  const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"] || false;
+  let articleId;
+
+  console.log(annotateLabel, hasLabel, label, pageCreated);
+
+  switch (true) {
+    // check if a label is specified in the environment and we received a label in the webhook payload
+    case annotateLabel && hasLabel:
+      const labels = label?.labels || [label]; // handle one vs multiple labels
+      const labelNames = labels.map((label) => label.name);
+
+      console.log(`Received LABEL_ADDED webhook.`, label);
+
+      // bail if a label is specified in the environment but not in the webhook we received
+      if (!labelNames.includes(annotateLabel)) {
+        console.log(
+          `Label "${annotateLabel}" does not match any of the labels "${labelNames}" specified in environment.`,
+          label
+        );
+        return new Response("Not an annotation label", { status: 400 });
+      }
+      articleId = label.pageId;
+      break;
+
+    case annotateLabel && isPageCreatedWebhook:
+      // only proceed to process the PAGE_CREATED webhook if no label is specified in the environment
+      console.log(`Received PAGE_CREATED webhook.`, pageCreated);
+      articleId = pageCreated.id;
+      break;
+
+    default:
+      // don't do anything if no label is specified in the environment
+      // and we didn't receive a label in the webhook payload
+      console.log("Neither label data received nor PAGE_CREATED event.");
+      return new Response(
+        "Neither label data received nor PAGE_CREATED event.",
+        {
+          status: 400,
+        }
+      );
+  }
+
+  // STEP 1: fetch the full article content from Omnivore (not part of the webhook payload)
   const omnivoreHeaders = {
     "Content-Type": "application/json",
     Authorization: process.env["OMNIVORE_API_KEY"],
   };
-
-  const hasLabel = label?.labels?.length || label?.name;
-
-  // bail if a label is specified in the environment but not in the webhook we received
-  // if the environment has no label set, we'll just process everything (only use on PAGE_CREATED event!)
-  if (annotateLabel && !hasLabel) {
-    console.log(
-      `Label does not match label "${annotateLabel}" specified in environment.`,
-      label
-    );
-    return new Response("Not a annotation label");
-  }
-  // handle case of multiple labels
-  if (annotateLabel && label?.labels) {
-    const labels = label?.labels;
-    const labelNames = labels.map((label) => label.name);
-    if (!labelNames.includes(annotateLabel)) {
-      console.log(
-        `Label "${annotateLabel}" does not match any of the labels "${labelNames}" specified in environment.`,
-        label
-      );
-      return new Response("Not a annotation label");
-    }
-  }
-
-  // STEP 1: fetch the full article content from Omnivore (not part of the webhook payload)
-  const articleId = label?.pageId || label.id;
-  const openai = new OpenAI(); // defaults to process.env["OPENAI_API_KEY"]
   /**
    * GraphQL query to retrieve article content and labels based on page ID.
    * @param {Object} req - The request object.
@@ -136,6 +182,7 @@ export default async (req) => {
 
   // STEP 2: generate a completion using OpenAI's API
   let completionResponse;
+  const openai = new OpenAI(); // defaults to process.env["OPENAI_API_KEY"]
   const prompt =
     process.env["OPENAI_PROMPT"] ||
     "Return a tweet-length TL;DR of the following article.";
