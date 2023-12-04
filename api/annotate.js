@@ -55,36 +55,39 @@ export default async (req) => {
   //   }
   // }
 
+  const { label } = body;
   const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"];
   const omnivoreHeaders = {
     "Content-Type": "application/json",
     Authorization: process.env["OMNIVORE_API_KEY"],
   };
 
+  const hasLabel = label?.labels?.length || label?.name;
+
   // bail if a label is specified in the environment but not in the webhook we received
   // if the environment has no label set, we'll just process everything (only use on PAGE_CREATED event!)
-  if (annotateLabel && body.label && body.label.name !== annotateLabel) {
+  if (annotateLabel && !hasLabel) {
     console.log(
-      `Label "${body.label?.name}" does not match label "${annotateLabel}" specified in environment.`,
-      body
+      `Label does not match label "${annotateLabel}" specified in environment.`,
+      label
     );
     return new Response("Not a annotation label");
   }
   // handle case of multiple labels
-  if (annotateLabel && body.label.labels) {
-    const labels = body.label?.labels;
+  if (annotateLabel && label?.labels) {
+    const labels = label?.labels;
     const labelNames = labels.map((label) => label.name);
     if (!labelNames.includes(annotateLabel)) {
       console.log(
         `Label "${annotateLabel}" does not match any of the labels "${labelNames}" specified in environment.`,
-        body
+        label
       );
       return new Response("Not a annotation label");
     }
   }
 
   // STEP 1: fetch the full article content from Omnivore (not part of the webhook payload)
-  const articleId = body.label?.pageId || body.id;
+  const articleId = label?.pageId || label.id;
   const openai = new OpenAI(); // defaults to process.env["OPENAI_API_KEY"]
   /**
    * GraphQL query to retrieve article content and labels based on page ID.
