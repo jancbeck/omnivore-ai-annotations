@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "nanoid": "^5.0.4",
     "openai": "^4.x"
   }
 }

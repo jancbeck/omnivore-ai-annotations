@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { nanoid } from "nanoid";
 
 export const config = {
   runtime: "edge",
@@ -74,6 +75,7 @@ export default async (req) => {
         method: "POST",
         headers: omnivoreHeaders,
         body: JSON.stringify({ query }),
+        redirect: "follow",
       }
     );
     omnivoreResponse = await omnivoreResponse.json();
@@ -122,7 +124,7 @@ Article content: ${articleContent}`,
       { status: 500 }
     );
   }
-  const articleSummary = completionResponse.choices[0].message.content
+  const articleAnnotation = completionResponse.choices[0].message.content
     .trim()
     .replace(/"/g, '\\"')
     .replace(/\\/g, "\\\\");
@@ -132,26 +134,57 @@ Article content: ${articleContent}`,
   // use simple hash for id shortid based on article id and datetime
   const annotationSettings =
     process.env["OMNIVORE_ANNOTATION_SETTINGS"] || `type: NOTE`;
+  const id = nanoid();
+  const shortId = nanoid(8);
 
-  query = `mutation CreateHighlight {
-    createHighlight(
-      input: {
-        id: "${articleId}", 
-        shortId: "${articleId}", 
-        articleId: "${articleId}", 
-        annotation: "${articleSummary.substring(0, 4000)}", 
-        ${annotationSettings}}
-    ) {
-      ... on CreateHighlightSuccess {
-        highlight {
-          id
+  query = {
+    query: `mutation CreateHighlight($input: CreateHighlightInput!) {
+      createHighlight(input: $input) {
+        ... on CreateHighlightSuccess {
+          highlight {
+            ...HighlightFields
+          }
+        }
+
+        ... on CreateHighlightError {
+          errorCodes
         }
       }
-      ... on CreateHighlightError {
-        errorCodes
-      }
     }
-  }`;
+    
+  fragment HighlightFields on Highlight {
+    id
+    type
+    shortId
+    quote
+    prefix
+    suffix
+    patch
+    color
+    annotation
+    createdByMe
+    createdAt
+    updatedAt
+    sharedAt
+    highlightPositionPercent
+    highlightPositionAnchorIndex
+    labels {
+      id
+      name
+      color
+      createdAt
+    }
+  }`,
+    variables: {
+      input: {
+        id: id,
+        shortId: shortId,
+        type: "NOTE",
+        articleId: articleId,
+        annotation: articleAnnotation,
+      },
+    },
+  };
   let OmnivoreAnnotationResponse;
   try {
     OmnivoreAnnotationResponse = await fetch(
@@ -159,9 +192,10 @@ Article content: ${articleContent}`,
       {
         method: "POST",
         headers: omnivoreHeaders,
-        body: JSON.stringify({ query }),
+        body: JSON.stringify(query),
       }
     );
+    console.log(query);
     OmnivoreAnnotationResponse = await OmnivoreAnnotationResponse.json();
     console.log(
       `Article annotation added to article "${articleTitle}" (ID: ${articleId}): ${JSON.stringify(
