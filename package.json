@@ -7,6 +7,6 @@
   "type": "module",
   "dependencies": {
     "openai": "^4.x",
-    "uuid": "^9.0.1"  
+    "uuid": "^9.0.1"
   }
 }
