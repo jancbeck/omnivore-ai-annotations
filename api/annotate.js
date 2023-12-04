@@ -39,7 +39,7 @@ export default async (req) => {
   // if the environment has no label set, we'll just process everything (only use on PAGE_CREATED event!)
   if (annotateLabel && body.label?.name !== annotateLabel) {
     console.log(
-      `Label "${body.label?.name}" does not match label "${annotateLabel}" specified in environment.`
+      `Label "${body.label?.name}" does not match label "${annotateLabel}" specified in environment. ${body}`
     );
     return new Response("Not a annotation label");
   }
