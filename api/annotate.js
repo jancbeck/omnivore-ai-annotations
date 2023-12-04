@@ -63,7 +63,7 @@ export default async (req) => {
 
   // bail if a label is specified in the environment but not in the webhook we received
   // if the environment has no label set, we'll just process everything (only use on PAGE_CREATED event!)
-  if (annotateLabel && body.label?.name !== annotateLabel) {
+  if (annotateLabel && body.label && body.label.name !== annotateLabel) {
     console.log(
       `Label "${body.label?.name}" does not match label "${annotateLabel}" specified in environment.`,
       body
@@ -71,7 +71,7 @@ export default async (req) => {
     return new Response("Not a annotation label");
   }
   // handle case of multiple labels
-  if (annotateLabel && body.label?.labels) {
+  if (annotateLabel && body.label.labels) {
     const labels = body.label?.labels;
     const labelNames = labels.map((label) => label.name);
     if (!labelNames.includes(annotateLabel)) {
