@@ -5,8 +5,8 @@
   "author": "jancbeck",
   "license": "MIT",
   "type": "module",
-    "dependencies": {
-      "openai": "^4.x",
-      "uuid": "^9.0.1"
-    }
+  "dependencies": {
+    "openai": "^4.x",
+    "uuid": "^9.0.1"  
   }
+}
