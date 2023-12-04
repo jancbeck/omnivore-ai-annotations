@@ -86,20 +86,31 @@ export default async (req) => {
   // }
 
   const { label, page: pageCreated } = body;
-  const isPageCreatedWebhook = Boolean(pageCreated?.id);
-  const hasLabel = Boolean(label?.labels?.length || label?.name);
-  const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"] || false;
+  let webhookType;
+  if (Boolean(label?.labels?.length || label?.name)) {
+    webhookType = "LABEL_ADDED";
+  }
+  if (Boolean(pageCreated?.id)) {
+    webhookType = "PAGE_CREATED";
+  }
   let articleId;
 
-  console.log(annotateLabel, hasLabel, label, pageCreated);
+  switch (webhookType) {
+    case "LABEL_ADDED":
+      console.log(`Received LABEL_ADDED webhook.`, label);
 
-  switch (true) {
-    // check if a label is specified in the environment and we received a label in the webhook payload
-    case annotateLabel && hasLabel:
+      const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"] || false;
+
+      // bail if no label is specified in the environment
+      if (!annotateLabel) {
+        console.log(`No label specified in environment.`);
+        return new Response("No label specified in environment.", {
+          status: 400,
+        });
+      }
+
       const labels = label?.labels || [label]; // handle one vs multiple labels
       const labelNames = labels.map((label) => label.name);
-
-      console.log(`Received LABEL_ADDED webhook.`, label);
 
       // bail if a label is specified in the environment but not in the webhook we received
       if (!labelNames.includes(annotateLabel)) {
@@ -112,8 +123,7 @@ export default async (req) => {
       articleId = label.pageId;
       break;
 
-    case annotateLabel && isPageCreatedWebhook:
-      // only proceed to process the PAGE_CREATED webhook if no label is specified in the environment
+    case "PAGE_CREATED":
       console.log(`Received PAGE_CREATED webhook.`, pageCreated);
       articleId = pageCreated.id;
       break;

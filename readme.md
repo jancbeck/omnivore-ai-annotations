@@ -18,7 +18,7 @@ When adding the repo to Vercel, set the [environment variables](https://vercel.c
 
 - `OMNIVORE_API_KEY` (required): omnivore.app --> [API Key](https://omnivore.app/settings/api)
 - `OPENAI_API_KEY` (required): platform.openai.com --> [API Keys](https://platform.openai.com/api-keys)
-- `OMNIVORE_ANNOTATE_LABEL` (required): set this to the name of label you want to use to trigger processing. Example: "Summarize" (without quotes). If you don't set this and use the `PAGE_CREATED` Omnivore webhook event, the script will process every article you add to Omnivore.
+- `OMNIVORE_ANNOTATE_LABEL` (optional): set this to the name of label you want to use to trigger processing. Example: "Summarize" (without quotes). Not required if you use the `PAGE_CREATED` Omnivore webhook event type which process every article added to Omnivore.
 - `OPENAI_PROMPT` (required): the instruction that's send to OpenAI's GPT model in addition to the article content. 
 - `OPENAI_MODEL` (optional): the [model name](https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo) to use. Defaults to "gpt-3.5-turbo-16k" (without quotes).
 - `OPENAI_SETTINGS` (optional, advanced): additional [request parameters](https://platform.openai.com/docs/api-reference/chat/create) send when generating the chat completion. Use JSON. Example: `{"temperature": 0, "seed": 1234}`.
