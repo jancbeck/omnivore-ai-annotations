@@ -10,16 +10,16 @@ For most convenience, deployment using [Vercel](https://vercel.com) is recommend
 
 Deploy the example using Vercel:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/jancbeck/omnivore-ai-annotations/tree/main)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fjancbeck%2Fomnivore-ai-annotations%2Ftree%2Fmain&env=OMNIVORE_API_KEY,OPENAI_API_KEY,OMNIVORE_ANNOTATE_LABEL,OPENAI_PROMPT&envDescription=API%20keys%20are%20required.%20OMNIVORE_ANNOTATE_LABEL%20is%20the%20name%20label%20that%20should%20trigger%20the%20workflow.%20OPENAI_PROMPT%20contains%20instructions%20for%20the%20AI%20model.&envLink=https%3A%2F%2Fgithub.com%2Fjancbeck%2Fomnivore-ai-annotations%2Ftree%2Fmain%23vercel-setup)
 
 ## Vercel Setup
 
-Once you added the repo to Vercel, set up the [environment variables](https://vercel.com/docs/projects/environment-variables).
+When adding the repo to Vercel, set the [environment variables](https://vercel.com/docs/projects/environment-variables) to make the APIs work and allow customization.
 
 - `OMNIVORE_API_KEY` (required): omnivore.app --> [API Key](https://omnivore.app/settings/api)
 - `OPENAI_API_KEY` (required): platform.openai.com --> [API Keys](https://platform.openai.com/api-keys)
-- `OMNIVORE_ANNOTATE_LABEL` (optional): set this to the name of label you want to use to trigger processing. Example: "Summarize" (without quotes). If you don't set this and use the `PAGE_CREATED` Omnivore webhook event, the script will process every article you add to Omnivore.
-- `OPENAI_PROMPT` (optional): the instruction that's send to OpenAI's GPT model in addition to the article content. 
+- `OMNIVORE_ANNOTATE_LABEL` (required): set this to the name of label you want to use to trigger processing. Example: "Summarize" (without quotes). If you don't set this and use the `PAGE_CREATED` Omnivore webhook event, the script will process every article you add to Omnivore.
+- `OPENAI_PROMPT` (required): the instruction that's send to OpenAI's GPT model in addition to the article content. 
 - `OPENAI_MODEL` (optional): the [model name](https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo) to use. Defaults to "gpt-3.5-turbo-16k" (without quotes).
 - `OPENAI_SETTINGS` (optional, advanced): additional [request parameters](https://platform.openai.com/docs/api-reference/chat/create) send when generating the chat completion. Use JSON. Example: `{"temperature": 0, "seed": 1234}`.
 
