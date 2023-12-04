@@ -10,7 +10,7 @@ For most convenience, deployment using [Vercel](https://vercel.com) is recommend
 
 Deploy the example using Vercel:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/jancbeck/omnivore-ai-annotations/tree/main)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/jancbeck/omnivore-ai-annotations/tree/main)
 
 ## Vercel Setup
 
