@@ -28,20 +28,20 @@ export default async (req) => {
   //     }
   // }
 
-  const summarizeLabel = process.env["OMNIVORE_SUMMARIZE_LABEL"];
+  const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"];
   const omnivoreHeaders = {
     "Content-Type": "application/json",
     Authorization: process.env["OMNIVORE_API_KEY"],
   };
 
   // bail if a label is specified in the environment but not in the webhook we received
-  // if the environment has no label set, we'll just summarize everything (only use on PAGE_CREATED event!)
-  if (summarizeLabel && body.label.name !== summarizeLabel) {
-    return new Response("Not a summarize label");
+  // if the environment has no label set, we'll just process everything (only use on PAGE_CREATED event!)
+  if (annotateLabel && body.label?.name !== annotateLabel) {
+    return new Response("Not a annotation label");
   }
 
   // STEP 1: fetch the full article content from Omnivore (not part of the webhook payload)
-  const articleId = body.label.pageId;
+  const articleId = body.label?.pageId || body.id;
   const openai = new OpenAI(); // defaults to process.env["OPENAI_API_KEY"]
   /**
    * GraphQL query to retrieve article content and labels based on page ID.
