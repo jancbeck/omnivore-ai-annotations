@@ -1,6 +1,12 @@
 {
-  "dependencies": {
-    "openai": "^4.x",
-    "uuid": "^9.0.1"
+  "name": "omnivore-ai-annotations",
+  "version": "1.0.0",
+  "description": "This serverless function can be used to automatically add annotations to Omnivore articles when a specific label (say, 'summarize') is added to them.",
+  "author": "jancbeck",
+  "license": "MIT",
+  "type": "module",
+    "dependencies": {
+      "openai": "^4.x",
+      "uuid": "^9.0.1"
+    }
   }
-}
