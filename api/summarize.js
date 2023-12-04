@@ -131,9 +131,6 @@ Article content: ${articleContent}`,
 
   // STEP 3: Update Omnivore article with OpenAI completion
 
-  // use simple hash for id shortid based on article id and datetime
-  const annotationInput =
-    process.env["OMNIVORE_ANNOTATION_INPUT"] || `{"type": "NOTE"}`;
   const id = uuidv4();
   const shortId = id.substring(0, 8);
 
@@ -177,7 +174,7 @@ Article content: ${articleContent}`,
   }`,
     variables: {
       input: {
-        ...JSON.parse(annotationInput),
+        type: "NOTE",
         id: id,
         shortId: shortId,
         articleId: articleId,
