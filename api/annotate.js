@@ -28,6 +28,32 @@ export default async (req) => {
   //       "createdAt": "2023-09-28T16: 38: 05.236Z"
   //     }
   // }
+  // or when multiple labels are are present:
+  //   {
+  //   action: 'created',
+  //   userId: '64275c28-cd60-11ed-a26c-fb80cc4a9a1e',
+  //   label: {
+  //     type: 'label',
+  //     userId: '64275c28-cd60-11ed-a26c-fb80cc4a9a1e',
+  //     pageId: '77d98706-74d5-11ee-a8cc-ab92ff997b71',
+  //     labels: [
+  //     {
+  //         id: '65f08a0e-5e1d-11ee-b62a-5ff4af17cb9a',
+  //         name: 'summarize',
+  //         color: '#CE88EF',
+  //         description: '',
+  //         createdAt: '2023-09-28T16:38:05.236Z'
+  //       },
+  //         {
+  //         id: 'd0fabf54-f6ee-11ed-89ae-07056972a2f0',
+  //         name: 'Newsletter',
+  //         color: '#07D2D1',
+  //         description: null,
+  //         createdAt: '2023-05-20T09:15:08.704Z'
+  //       }
+  //     ]
+  //   }
+  // }
 
   const annotateLabel = process.env["OMNIVORE_ANNOTATE_LABEL"];
   const omnivoreHeaders = {
@@ -43,6 +69,18 @@ export default async (req) => {
       body
     );
     return new Response("Not a annotation label");
+  }
+  // handle case of multiple labels
+  if (annotateLabel && body.label?.labels) {
+    const labels = body.label?.labels;
+    const labelNames = labels.map((label) => label.name);
+    if (!labelNames.includes(annotateLabel)) {
+      console.log(
+        `Label "${annotateLabel}" does not match any of the labels "${labelNames}" specified in environment.`,
+        body
+      );
+      return new Response("Not a annotation label");
+    }
   }
 
   // STEP 1: fetch the full article content from Omnivore (not part of the webhook payload)
