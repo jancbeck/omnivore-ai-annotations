@@ -10,6 +10,7 @@ export default async (req) => {
   try {
     body = await req.json();
   } catch (e) {
+    console.log(`No payload found: ${e.message}`);
     return new Response("No payload found.", { status: 400 });
   }
 
@@ -37,6 +38,9 @@ export default async (req) => {
   // bail if a label is specified in the environment but not in the webhook we received
   // if the environment has no label set, we'll just process everything (only use on PAGE_CREATED event!)
   if (annotateLabel && body.label?.name !== annotateLabel) {
+    console.log(
+      `Label "${body.label?.name}" does not match label "${annotateLabel}" specified in environment.`
+    );
     return new Response("Not a annotation label");
   }
 
@@ -190,6 +194,7 @@ Article content: ${articleContent}`,
         method: "POST",
         headers: omnivoreHeaders,
         body: JSON.stringify(query),
+        redirect: "follow",
       }
     );
     OmnivoreAnnotationResponse = await OmnivoreAnnotationResponse.json();
