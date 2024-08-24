@@ -2,9 +2,11 @@
 
 ## Overview
 
-This serverless function can be used to automatically add annotations to Omnivore articles when a specific label (say, "summarize") is added to them. It uses Omnivore's [API](https://docs.omnivore.app/integrations/api.html) and [webhooks](https://docs.omnivore.app/integrations/webhooks.html) as well as [OpenAI's chat completions API](https://platform.openai.com/docs/guides/text-generation). 
+This serverless function can be used to automatically add annotations to Omnivore articles when a specific label (say, "summarize") is added to them. It uses Omnivore's [API](https://docs.omnivore.app/integrations/api.html) and [webhooks](https://docs.omnivore.app/integrations/webhooks.html) as well as [OpenAI's chat completions API](https://platform.openai.com/docs/guides/text-generation).
 
 ## How to Use
+
+**See this article for detailed instructions: https://blog.omnivore.app/p/using-chatgpt-to-automatically-add**
 
 For most convenience, deployment using [Vercel](https://vercel.com) is recommended. Theoretically it could work on other serverless functions providers but I have only tested it with Vercel. Vercel offers a free hobby plan that should cover basic usage of this function.
 
@@ -18,9 +20,9 @@ When adding the repo to Vercel, set the [environment variables](https://vercel.c
 
 - `OMNIVORE_API_KEY` (required): omnivore.app --> [API Key](https://omnivore.app/settings/api)
 - `OPENAI_API_KEY` (required): platform.openai.com --> [API Keys](https://platform.openai.com/api-keys)
-- `OMNIVORE_ANNOTATE_LABEL` (optional): set this to the name of label you want to use to trigger processing. Example: "Summarize" (without quotes). Not required if you use the `PAGE_CREATED` Omnivore webhook event type which process every article added to Omnivore.
-- `OPENAI_PROMPT` (required): the instruction that's send to OpenAI's GPT model in addition to the article content. 
-- `OPENAI_MODEL` (optional): the [model name](https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo) to use. Defaults to "gpt-3.5-turbo-16k" (without quotes).
+- `OMNIVORE_ANNOTATE_LABEL` (optional): set this to the name of label you want to use to trigger processing. Example: "Summarize" (without quotes). Use colons to seperate label variants e.g. naming a label "Summarize:outline" will match the environment variable value "Summarize". Not required if you use the `PAGE_CREATED` Omnivore webhook event type which process every article added to Omnivore.
+- `OPENAI_PROMPT` (optional): the instruction that's send to OpenAI's GPT model in addition to the article content if no label description has been entered. Uses the label description from Omnivore if available.
+- `OPENAI_MODEL` (optional): the [model name](https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo) to use. Defaults to "gpt-4o-mini" (without quotes).
 - `OPENAI_SETTINGS` (optional, advanced): additional [request parameters](https://platform.openai.com/docs/api-reference/chat/create) send when generating the chat completion. Use JSON. Example: `{"temperature": 0, "seed": 1234}`.
 
 Deploy and copy the URL of your deployment.
@@ -29,14 +31,14 @@ Deploy and copy the URL of your deployment.
 
 In Omnivore add a new [webhook](https://omnivore.app/settings/webhooks) and set the URL to the deployed Vercel function URL from the step above and add the path `/api/annotate` to it. Example: `https://projectname.vercel.app/api/annotate`
 
-If you have defined a label name to listen for in the step above, then select `LABEL_ADDED` as event type. 
+If you have defined a label name to listen for in the step above, then select `LABEL_ADDED` as event type.
 If you want the function to process every article you add to Omnivore, then instead select `PAGE_CREATED`.
 
-Now either add a new article to Omnivore or your label to an existing article. Within less than a minute, the response of the model's completion should appear in the notebook of the article. 
+Now either add a new article to Omnivore or your label to an existing article. Within less than a minute, the response of the model's completion should appear in the notebook of the article.
 
 Check the [runtime logs](https://vercel.com/docs/observability/runtime-logs) if you encounter issues. Check your API keys and never share them publicly.
 
-## Development 
+## Development
 
 ### Clone and Deploy
 
@@ -70,11 +72,16 @@ vercel dev
 
 Observe the response and terminal output for logging information.
 
+## Changelog
+
+- 2024-08-24: allow prompts from label description and label variants
+- 2023-09-28: inital release
+
 ## License
 
 MIT License.
 
 ## Ideas
 
-- [ ] use individual article highlights to allow "chatting" within Omnivore (e.g. highlight text, add note "explain" and GPT will generate the highlight with a reply based on the prompt and context. 
+- [ ] use individual article highlights to allow "chatting" within Omnivore (e.g. highlight text, add note "explain" and GPT will generate the highlight with a reply based on the prompt and context.
 - [ ] instruct the model to highlight the article for you via [function calls](https://platform.openai.com/docs/guides/function-calling). Perhaps using the article notebook as an instruction input.
